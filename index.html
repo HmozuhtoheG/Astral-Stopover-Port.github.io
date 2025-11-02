@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星驿港 - Astral Stopover Port</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            overflow-x: hidden;
+        }
+
+        .lang-switch {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 10;
+        }
+
+        .lang-btn {
+            background-color: #1a1a1a;
+            color: #ccc;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            color: #fff;
+            background-color: #2a2a2a;
+        }
+
+        .lang-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            padding: 0.5rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            width: max-content;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .lang-list.active {
+            max-height: 200px;
+            opacity: 1;
+        }
+
+        .lang-list a {
+            display: block;
+            padding: 0.3rem 1rem;
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .lang-list a:hover, .lang-list a.active {
+            color: #fff;
+            background-color: #2a2a2a;
+        }
+
+        .nav {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 2rem;
+            z-index: 10;
+        }
+
+        .nav a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+
+        .nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            transition: width 0.3s ease;
+        }
+
+        .nav a:hover {
+            color: #fff;
+        }
+
+        .nav a:hover::after {
+            width: 100%;
+        }
+
+        .title-container {
+            text-align: center;
+            margin-top: 8rem;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chinese-title {
+            font-size: 4rem;
+            font-weight: 700;
+            letter-spacing: 0.1rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .english-title {
+            font-size: 2rem;
+            color: #aaa;
+            font-weight: 300;
+            letter-spacing: 0.2rem;
+            opacity: 0;
+            animation: fadeIn 0.6s 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .content {
+            max-width: 1000px;
+            width: 100%;
+            padding: 2rem;
+            min-height: 400px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .content.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .welcome-text {
+            text-align: center;
+            font-size: 1.4rem;
+            color: #bbb;
+            line-height: 2;
+            margin-top: 4rem;
+            opacity: 0;
+            animation: fadeIn 0.6s 0.5s forwards;
+        }
+
+        .identity-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .faction {
+            padding: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .faction::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .faction:hover::before {
+            transform: scaleX(1);
+        }
+
+        .faction-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faction-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faction-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, padding 0.3s ease;
+            padding-top: 0;
+            color: #ddd;
+            line-height: 1.8;
+        }
+
+        .faction.active .faction-content {
+            max-height: 300px;
+            padding-top: 1rem;
+        }
+
+        .faction.active .faction-icon {
+            transform: rotate(180deg);
+        }
+
+        .crew {
+            border: 1px solid #1a73e8;
+        }
+
+        .crew .faction-title {
+            color: #1a73e8;
+        }
+
+        .crew::before {
+            background-color: #1a73e8;
+        }
+
+        .impostor {
+            border: 1px solid #ea4335;
+        }
+
+        .impostor .faction-title {
+            color: #ea4335;
+        }
+
+        .impostor::before {
+            background-color: #ea4335;
+        }
+
+        .neutral {
+            border: 1px solid #9aa0a6;
+        }
+
+        .neutral .faction-title {
+            color: #9aa0a6;
+        }
+
+        .neutral::before {
+            background-color: #9aa0a6;
+        }
+
+        .special {
+            border: 1px solid #0d47a1;
+        }
+
+        .special .faction-title {
+            color: #0d47a1;
+        }
+
+        .special::before {
+            background-color: #0d47a1;
+        }
+
+        .secret-text {
+            color: #64ffda;
+            font-style: italic;
+        }
+
+        .intro-container {
+            color: #ddd;
+            line-height: 2;
+            font-size: 1.1rem;
+        }
+
+        .intro-title {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #64ffda;
+            padding-left: 1rem;
+        }
+
+        .intro-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background-color: #121212;
+            border-radius: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .chinese-title {
+                font-size: 3rem;
+            }
+            .english-title {
+                font-size: 1.5rem;
+            }
+            .nav, .lang-switch {
+                top: 1rem;
+                gap: 0.8rem;
+            }
+            .lang-switch {
+                left: 1rem;
+            }
+            .nav {
+                right: 1rem;
+            }
+            .content {
+                padding: 1rem;
+            }
+            .faction-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lang-switch">
+        <button class="lang-btn">语言 <span class="lang-icon">▼</span></button>
+        <div class="lang-list">
+            <a href="#" class="lang active" data-lang="zh-CN">简体中文</a>
+            <a href="#" class="lang" data-lang="zh-TW">繁体中文</a>
+            <a href="#" class="lang" data-lang="en">English</a>
+            <a href="#" class="lang" data-lang="ja">日本語</a>
+        </div>
+    </div>
+
+    <div class="nav">
+        <a href="#home" class="nav-link" data-i18n="nav.home">主页</a>
+        <a href="#identity" class="nav-link" data-i18n="nav.identity">身份</a>
+        <a href="#introduction" class="nav-link" data-i18n="nav.introduction">介绍</a>
+    </div>
+
+    <div class="title-container">
+        <div class="chinese-title" data-i18n="title.chinese">星驿港</div>
+        <div class="english-title" data-i18n="title.english">Astral Stopover Port</div>
+    </div>
+
+    <div id="home-content" class="content active">
+        <div class="welcome-text" data-i18n="home.welcome">
+            欢迎来到星驿港<br>
+            这里是AmongUs模组「星尘计划」的中转枢纽<br>
+            船员、内鬼、特殊职业在此交汇<br>
+            一场关于信任与背叛的星际博弈即将展开
+        </div>
+    </div>
+
+    <div id="identity-content" class="content hidden">
+        <div class="identity-container">
+            <div class="faction crew">
+                <div class="faction-title" data-i18n="faction.crew">
+                    船员阵营
+                    <span class="faction-icon">▼</span>
+                </div>
+                <div class="faction-content">
+                    <p data-i18n="faction.crew.desc">飞船的核心成员，负责维护航行安全并完成任务。目标是找出内鬼并将其驱逐。</p>
+                    <p class="secret-text" data-i18n="faction.secret">身份信息 暂时保密</p>
+                </div>
+            </div>
+
+            <div class="faction impostor">
+                <div class="faction-title" data-i18n="faction.impostor">
+                    内鬼阵营
+                    <span class="faction-icon">▼</span>
+                </div>
+                <div class="faction-content">
+                    <p data-i18n="faction.impostor.desc">潜伏在船员中的破坏者，目标是通过暗杀或破坏导致任务失败。</p>
+                    <p class="secret-text" data-i18n="faction.secret">身份信息 暂时保密</p>
+                </div>
+            </div>
+
+            <div class="faction neutral">
+                <div class="faction-title" data-i18n="faction.neutral">
+                    中立阵营
+                    <span class="faction-icon">▼</span>
+                </div>
+                <div class="faction-content">
+                    <p data-i18n="faction.neutral.desc">既不属于船员也不属于内鬼，有独立的胜利目标，需在混乱中完成任务。</p>
+                    <p class="secret-text" data-i18n="faction.secret">身份信息 暂时保密</p>
+                </div>
+            </div>
+
+            <div class="faction special">
+                <div class="faction-title" data-i18n="faction.special">
+                    特殊职业
+                    <span class="faction-icon">▼</span>
+                </div>
+                <div class="faction-content">
+                    <p data-i18n="faction.special.desc">拥有独特背景和能力的特殊角色，不属于任何基础阵营。</p>
+                    <p class="secret-text" data-i18n="faction.secret">身份信息 暂时保密</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="introduction-content" class="content hidden">
+        <div class="intro-container">
+            <div class="intro-title" data-i18n="intro.title">AmongUs模组「星尘计划」</div>
+            
+            <div class="intro-section">
+                <p data-i18n="intro.desc1">这是一个充满创意的AmongUs自定义模组，融合了丰富的职业设定与策略玩法，为玩家带来全新的星际博弈体验。模组保留原版核心玩法，新增多种独特职业，让每一局游戏都充满未知与惊喜。</p>
+            </div>
+            
+            <div class="intro-section">
+                <h3 data-i18n="intro.features">模组特色</h3>
+                <ul style="margin-left: 1.5rem;">
+                    <li data-i18n="intro.feature1">「新增多种职业」：丰富的职业体系，每局游戏随机分配，带来多样的玩法策略</li>
+                    <li data-i18n="intro.feature2">「独特职业机制」：每个职业拥有专属技能与胜利条件，打破传统阵营界限</li>
+                    <li data-i18n="intro.feature3">「玩家共创」：玩家可提交职业设计与功能建议，共同塑造模组的未来内容</li>
+                </ul>
+            </div>
+            
+            <div class="intro-section">
+                <p data-i18n="intro.desc2">我们相信，游戏的乐趣源于创意与策略的碰撞。在星驿港的每一次对局，都是一场关于信任与谋略的星际冒险——从职业选择到局势博弈，最终都会化为难忘的游戏记忆。</p>
+                <p style="margin-top: 1rem;" data-i18n="intro.desc3">准备好加入这场星际博弈了吗？星尘计划，等待你的探索与创意。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const i18n = {
+            "zh-CN": {
+                "nav.home": "主页",
+                "nav.identity": "身份",
+                "nav.introduction": "介绍",
+                "title.chinese": "星驿港",
+                "title.english": "Astral Stopover Port",
+                "home.welcome": "欢迎来到星驿港<br>这里是AmongUs模组「星尘计划」的中转枢纽<br>船员、内鬼、特殊职业在此交汇<br>一场关于信任与背叛的星际博弈即将展开",
+                "faction.crew": "船员阵营",
+                "faction.impostor": "内鬼阵营",
+                "faction.neutral": "中立阵营",
+                "faction.special": "特殊职业",
+                "faction.crew.desc": "飞船的核心成员，负责维护航行安全并完成任务。目标是找出内鬼并将其驱逐。",
+                "faction.impostor.desc": "潜伏在船员中的破坏者，目标是通过暗杀或破坏导致任务失败。",
+                "faction.neutral.desc": "既不属于船员也不属于内鬼，有独立的胜利目标，需在混乱中完成任务。",
+                "faction.special.desc": "拥有独特背景和能力的特殊角色，不属于任何基础阵营。",
+                "faction.secret": "身份信息 暂时保密",
+                "intro.title": "AmongUs模组「星尘计划」",
+                "intro.desc1": "这是一个充满创意的AmongUs自定义模组，融合了丰富的职业设定与策略玩法，为玩家带来全新的星际博弈体验。模组保留原版核心玩法，新增多种独特职业，让每一局游戏都充满未知与惊喜。",
+                "intro.features": "模组特色",
+                "intro.feature1": "「新增多种职业」：丰富的职业体系，每局游戏随机分配，带来多样的玩法策略",
+                "intro.feature2": "「独特职业机制」：每个职业拥有专属技能与胜利条件，打破传统阵营界限",
+                "intro.feature3": "「玩家共创」：玩家可提交职业设计与功能建议，共同塑造模组的未来内容",
+                "intro.desc2": "我们相信，游戏的乐趣源于创意与策略的碰撞。在星驿港的每一次对局，都是一场关于信任与谋略的星际冒险——从职业选择到局势博弈，最终都会化为难忘的游戏记忆。",
+                "intro.desc3": "准备好加入这场星际博弈了吗？星尘计划，等待你的探索与创意。"
+            },
+            "zh-TW": {
+                "nav.home": "主頁",
+                "nav.identity": "身份",
+                "nav.introduction": "介紹",
+                "title.chinese": "星驿港",
+                "title.english": "Astral Stopover Port",
+                "home.welcome": "歡迎來到星驿港<br>這裡是AmongUs模組「星塵計劃」的中轉樞紐<br>船員、內鬼、特殊職業在此交匯<br>一場關於信任與背叛的星際博弈即將展開",
+                "faction.crew": "船員陣營",
+                "faction.impostor": "內鬼陣營",
+                "faction.neutral": "中立陣營",
+                "faction.special": "特殊職業",
+                "faction.crew.desc": "飛船的核心成員，負責維護航行安全並完成任務。目標是找出內鬼並將其驅逐。",
+                "faction.impostor.desc": "潛伏在船員中的破壞者，目標是通過暗殺或破壞導致任務失敗。",
+                "faction.neutral.desc": "既不屬於船員也不屬於內鬼，有獨立的勝利目標，需在混亂中完成任務。",
+                "faction.special.desc": "擁有獨特背景和能力的特殊角色，不屬於任何基礎陣營。",
+                "faction.secret": "身份資訊 暫時保密",
+                "intro.title": "AmongUs模組「星塵計劃」",
+                "intro.desc1": "這是一個充滿創意的AmongUs自定義模組，融合了豐富的職業設定與策略玩法，為玩家帶來全新的星際博弈體驗。模組保留原版核心玩法，新增多種獨特職業，讓每一局遊戲都充滿未知與驚喜。",
+                "intro.features": "模組特色",
+                "intro.feature1": "「新增多種職業」：豐富的職業體系，每局遊戲隨機分配，帶來多樣的玩法策略",
+                "intro.feature2": "「獨特職業機制」：每個職業擁有專屬技能與勝利條件，打破傳統陣營界限",
+                "intro.feature3": "「玩家共創」：玩家可提交職業設計與功能建議，共同塑造模組的未來內容",
+                "intro.desc2": "我們相信，遊戲的樂趣源於創意與策略的碰撞。在星驿港的每一次對局，都是一場關於信任與謀略的星際冒險——從職業選擇到局勢博弈，最終都會化為難忘的遊戲記憶。",
+                "intro.desc3": "準備好加入這場星際博弈了嗎？星塵計劃，等待你的探索與創意。"
+            },
+            "en": {
+                "nav.home": "Home",
+                "nav.identity": "Identity",
+                "nav.introduction": "Introduction",
+                "title.chinese": "星驿港",
+                "title.english": "Astral Stopover Port",
+                "home.welcome": "Welcome to Astral Stopover Port<br>This is the hub for the AmongUs mod \"Stardust Project\"<br>Crewmates, Impostors, and special roles converge here<br>A interstellar game of trust and betrayal is about to begin",
+                "faction.crew": "Crewmate Faction",
+                "faction.impostor": "Impostor Faction",
+                "faction.neutral": "Neutral Faction",
+                "faction.special": "Special Roles",
+                "faction.crew.desc": "Core members of the ship, responsible for maintaining safety and completing tasks. Goal is to identify and eliminate Impostors.",
+                "faction.impostor.desc": "Saboteurs lurking among crewmates, aiming to cause mission failure through assassinations or sabotage.",
+                "faction.neutral.desc": "Neither crew nor impostor, with independent victory conditions. Must complete objectives amid chaos.",
+                "faction.special.desc": "Unique characters with distinct backgrounds and abilities, not belonging to basic factions.",
+                "faction.secret": "Identity information is temporarily confidential",
+                "intro.title": "AmongUs Mod \"Stardust Project\"",
+                "intro.desc1": "A creative AmongUs custom mod that integrates rich role settings and strategic gameplay, bringing players a brand-new interstellar game experience. The mod retains the original core gameplay and adds various unique roles, making each game full of unknowns and surprises.",
+                "intro.features": "Mod Features",
+                "intro.feature1": "「New Roles Added」: A rich role system, randomly assigned in each game, bringing diverse gameplay strategies",
+                "intro.feature2": "「Unique Role Mechanics」: Each role has exclusive skills and victory conditions, breaking traditional faction boundaries",
+                "intro.feature3": "「Player Co-creation」: Players can submit role designs and feature suggestions to shape the mod's future content together",
+                "intro.desc2": "We believe that the fun of games comes from the collision of creativity and strategy. Every game at Astral Stopover Port is an interstellar adventure about trust and strategy—from role selection to situation games, it will eventually become an unforgettable gaming memory.",
+                "intro.desc3": "Ready to join this interstellar game? Stardust Project is waiting for your exploration and creativity."
+            },
+            "ja": {
+                "nav.home": "ホーム",
+                "nav.identity": "身份",
+                "nav.introduction": "紹介",
+                "title.chinese": "星驿港",
+                "title.english": "Astral Stopover Port",
+                "home.welcome": "星驿港へようこそ<br>ここはAmongUsモッド「星塵計画」の中継ハブです<br>クルー、インポスター、特殊職業がここに集まります<br>信頼と裏切りに関する星間ゲームが始まろうとしています",
+                "faction.crew": "クルー陣営",
+                "faction.impostor": "インポスター陣営",
+                "faction.neutral": "中立陣営",
+                "faction.special": "特殊職業",
+                "faction.crew.desc": "船の中核メンバーで、航行安全の維持と任務の達成を担当します。目標はインポスターを特定して追放することです。",
+                "faction.impostor.desc": "クルーの中に潜伏する破壊者で、暗殺や破壊によって任務失敗を引き起こすことを目指します。",
+                "faction.neutral.desc": "クルーでもインポスターでもなく、独立した勝利目標を持ち、混沌の中で任務を完了する必要があります。",
+                "faction.special.desc": "独特の背景と能力を持つ特殊なキャラクターで、基本的な陣営に属しません。",
+                "faction.secret": "身分情報 一時的に機密",
+                "intro.title": "AmongUsモッド「星塵計画」",
+                "intro.desc1": "これは創意に満ちたAmongUsカスタムモッドで、豊富な役職設定と戦略的なゲームプレイを融合させ、プレイヤーに新たな星間ゲーム体験をもたらします。モッドはオリジナルのコアゲームプレイを保持しつつ、多様な独特の役職を追加し、各ゲームが未知と驚きに満ちたものになるようにしています。",
+                "intro.features": "モッドの特徴",
+                "intro.feature1": "「多種多様な役職追加」：豊富な役職システムで、各ゲームでランダムに割り当てられ、多様なプレイ戦略をもたらします",
+                "intro.feature2": "「独特の役職メカニクス」：各役職が専用のスキルと勝利条件を持ち、伝統的な陣営の境界を打破します",
+                "intro.feature3": "「プレイヤー共創」：プレイヤーは役職デザインや機能提案を提出し、モッドの未来のコンテンツを共同で作り上げることができます",
+                "intro.desc2": "私たちは、ゲームの楽しみは創意と戦略のぶつかり合いにあると信じています。星驿港での毎回の対局は、信頼と謀略に関する星間冒険です。役職選択から状況ゲームまで、最終的には忘れられないゲームの思い出になります。",
+                "intro.desc3": "この星間ゲームに参加する準備はできましたか？星塵計画はあなたの探求と創意を待っています。"
+            }
+        };
+
+        const langBtn = document.querySelector('.lang-btn');
+        const langList = document.querySelector('.lang-list');
+        const langLinks = document.querySelectorAll('.lang-list .lang');
+
+        langBtn.addEventListener('click', function() {
+            langList.classList.toggle('active');
+        });
+
+        langLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const lang = this.getAttribute('data-lang');
+                
+                document.querySelectorAll('.lang').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    el.innerHTML = i18n[lang][key] || i18n['zh-CN'][key];
+                });
+                
+                langList.classList.remove('active');
+            });
+        });
+
+        document.querySelectorAll('.nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                
+                document.querySelectorAll('.content').forEach(section => {
+                    section.classList.remove('active');
+                    section.classList.add('hidden');
+                });
+                
+                const targetSection = document.getElementById(`${targetId}-content`);
+                targetSection.classList.remove('hidden');
+                setTimeout(() => {
+                    targetSection.classList.add('active');
+                }, 50);
+            });
+        });
+
+        document.querySelectorAll('.faction').forEach(faction => {
+            faction.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+    </script>
+</body>
+</html>
